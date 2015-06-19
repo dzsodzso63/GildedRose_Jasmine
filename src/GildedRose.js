@@ -8,51 +8,56 @@ var GildedRose = function () {
   items.push(new Item("Conjured Mana Cake", 3, 6));
   GildedRose.updateQuality(items);
 };
+var constants = {
+    qualityDecay : 1,
+    maxQuality : 50
+};
+
 GildedRose.updateQuality = function (items) {
-  for (var i = 0; i < items.length; i++) {
-    if ("Aged Brie" != items[i].name && "Backstage passes to a TAFKAL80ETC concert" != items[i].name) {
-      if (items[i].quality > 0) {
-        if ("Sulfuras, Hand of Ragnaros" != items[i].name) {
-          items[i].quality = items[i].quality - 1
-        }
+  items.forEach(function (currentItem, i) {
+
+    if ("Aged Brie" == currentItem.name ) {
+      if (currentItem.quality < constants.maxQuality) {
+        currentItem.quality++;
       }
-    } else {
-      if (items[i].quality < 50) {
-        items[i].quality = items[i].quality + 1
-        if ("Backstage passes to a TAFKAL80ETC concert" == items[i].name) {
-          if (items[i].sellIn < 11) {
-            if (items[i].quality < 50) {
-              items[i].quality = items[i].quality + 1
-            }
-          }
-          if (items[i].sellIn < 6) {
-            if (items[i].quality < 50) {
-              items[i].quality = items[i].quality + 1
-            }
-          }
-        }
+      currentItem.sellIn -= constants.qualityDecay;
+      if (currentItem.sellIn < 0) {
+        addQualityIfBelowMaxQuality(currentItem);
       }
     }
-    if ("Sulfuras, Hand of Ragnaros" != items[i].name) {
-      items[i].sellIn = items[i].sellIn - 1;
-    }
-    if (items[i].sellIn < 0) {
-      if ("Aged Brie" != items[i].name) {
-        if ("Backstage passes to a TAFKAL80ETC concert" != items[i].name) {
-          if (items[i].quality > 0) {
-            if ("Sulfuras, Hand of Ragnaros" != items[i].name) {
-              items[i].quality = items[i].quality - 1
-            }
-          }
-        } else {
-          items[i].quality = items[i].quality - items[i].quality
+    else if ("Backstage passes to a TAFKAL80ETC concert" == currentItem.name){
+      if (currentItem.quality < constants.maxQuality) {
+        currentItem.quality++;
+        if (currentItem.sellIn < 11) {
+          addQualityIfBelowMaxQuality(currentItem);
         }
-      } else {
-        if (items[i].quality < 50) {
-          items[i].quality = items[i].quality + 1
+        if (currentItem.sellIn < 6) {
+          addQualityIfBelowMaxQuality(currentItem);
         }
       }
+      currentItem.sellIn -= constants.qualityDecay;
+      if (currentItem.sellIn < 0) {
+        currentItem.quality = 0;
+      }
     }
-  }
+    else if ("Sulfuras, Hand of Ragnaros" == currentItem.name){
+    }
+    else {
+      if (currentItem.quality > 0) {
+        currentItem.quality -= constants.qualityDecay;
+      }
+      currentItem.sellIn -= constants.qualityDecay;
+
+      if (currentItem.sellIn < 0) {
+        currentItem.quality -= constants.qualityDecay;
+      }
+    }
+  });
   return items;
+}
+
+var addQualityIfBelowMaxQuality = function (item) {
+  if (item.quality < constants.maxQuality) {
+    item.quality += 1;
+  }
 };
